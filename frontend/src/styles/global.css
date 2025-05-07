@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+.weather-gradient-day {
+  background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+}
+
+.weather-gradient-night {
+  background: linear-gradient(120deg, #4b6cb7 0%, #182848 100%);
+  color: white;
+}
+
+.weather-gradient-cloudy {
+  background: linear-gradient(120deg, #bdc3c7 0%, #2c3e50 100%);
+  color: white;
+}
+
+.weather-gradient-rainy {
+  background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+}
+
+.weather-card {
+  transition: transform 0.3s ease-in-out;
+}
+
+.weather-card:hover {
+  transform: translateY(-5px);
+}
