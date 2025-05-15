@@ -4,16 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\WeatherController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| API routes can be registered for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. 
-|
-*/
+// ✅ This route must be OUTSIDE the weather prefix group
+Route::get('/test-weather', function () {
+    return response()->json(['message' => '✅ Weather API is running!']);
+});
 
 // Weather API Routes
 Route::prefix('weather')->group(function () {

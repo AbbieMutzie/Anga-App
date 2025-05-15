@@ -107,3 +107,4 @@ The frontend connects to the following backend API endpoints:
 - `GET /api/forecast/coordinates?lat={lat}&lon={lon}` - Get 5-day forecast by coordinates
 
 ## License
+MIT

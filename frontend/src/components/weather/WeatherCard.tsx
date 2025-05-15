@@ -9,7 +9,7 @@ interface WeatherCardProps {
 
 const WeatherCard: React.FC<WeatherCardProps> = ({ forecast, compact = false }) => {
   const gradientClass = getWeatherGradientClass(forecast.weather.main, forecast.date);
-  
+
   if (compact) {
     return (
       <div className={`card shadow-sm weather-card ${gradientClass}`}>
@@ -30,7 +30,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ forecast, compact = false }) 
       </div>
     );
   }
-  
+
   return (
     <div className={`card shadow-md weather-card ${gradientClass}`}>
       <div className="card-body">
@@ -40,7 +40,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ forecast, compact = false }) 
             <p className="text-base">{formatTime(forecast.time)}</p>
             <p className="text-lg capitalize mt-2">{forecast.weather.description}</p>
           </div>
-          
+
           <div className="flex items-center mx-auto md:mx-0">
             <img 
               src={getWeatherIconUrl(forecast.weather.icon)}
@@ -54,7 +54,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ forecast, compact = false }) 
               </p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-4 md:mt-0 md:ml-8">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,21 +62,21 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ forecast, compact = false }) 
               </svg>
               <span>Humidity: {forecast.humidity}%</span>
             </div>
-            
+
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
               </svg>
               <span>Pressure: {forecast.pressure} hPa</span>
             </div>
-            
+
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <span>Wind: {forecast.wind.speed} m/s</span>
             </div>
-            
+
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4" />
@@ -88,3 +88,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ forecast, compact = false }) 
       </div>
     </div>
   );
+};
+
+export default WeatherCard;

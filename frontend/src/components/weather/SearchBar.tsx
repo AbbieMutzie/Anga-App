@@ -27,7 +27,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onUseLocation, isLoadin
           <div className="form-field">
             <input
               type="text"
-              placeholder="Enter city name (e.g., London, Tokyo, New York)"
+              placeholder="Enter city name (e.g., London, Nairobi, New York)"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               className="input input-lg w-full"

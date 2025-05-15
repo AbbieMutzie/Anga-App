@@ -32,8 +32,8 @@ return [
     ],
     
     // OpenWeatherMap API Configuration
-    'openweathermap' => [
-        'key' => env('OPE2b040d847fed56d849e764c0dafb420a'),
-    ],
+   'openweathermap' => [
+    'key' => env('OPENWEATHER_API_KEY'),
+],
 
 ];

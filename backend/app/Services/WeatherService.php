@@ -11,132 +11,118 @@ class WeatherService
 {
     /**
      * Base URL for OpenWeatherMap API
-     *
-     * @var string
      */
-    protected $baseUrl = 'https://api.openweathermap.org/data/2.5';
-    
+    protected string $baseUrl = 'https://api.openweathermap.org/data/2.5';
+
     /**
      * API key for OpenWeatherMap
-     *
-     * @var string
      */
-    protected $apiKey;
-    
+    protected string $apiKey;
+
     /**
      * Cache TTL in seconds (30 minutes)
-     *
-     * @var int
      */
-    protected $cacheTtl = 1800;
-    
+    protected int $cacheTtl = 1800;
+
     /**
-     * Create a new service instance.
+     * Units system (e.g. metric, imperial)
+     */
+    protected string $units;
+
+    /**
+     * Constructor
      */
     public function __construct()
     {
         $this->apiKey = config('services.openweathermap.key');
-        
+        $this->units = config('weather.units', 'metric');
+
         if (!$this->apiKey) {
-            Log::error('OpenWeatherMap API key is not set');
+            Log::error('OpenWeatherMap API key is not set.');
         }
     }
-    
+
     /**
-     * Get current weather data by city name
-     *
-     * @param string $city
-     * @return array
-     * @throws \Exception
+     * Get current weather by city name
      */
     public function getCurrentWeatherByCity(string $city): array
     {
         $cacheKey = 'weather_current_' . strtolower(str_replace(' ', '_', $city));
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($city) {
-            $response = Http::get("{$this->baseUrl}/weather", [
-                'q' => $city,
-                'appid' => $this->apiKey,
-                'units' => 'metric', // Use metric units by default
-            ]);
-            
+            $response = Http::retry(3, 100)
+                ->get("{$this->baseUrl}/weather", [
+                    'q' => $city,
+                    'appid' => $this->apiKey,
+                    'units' => $this->units,
+                ]);
+
             if ($response->failed()) {
                 Log::error('Failed to fetch current weather data', [
                     'city' => $city,
                     'status' => $response->status(),
                     'response' => $response->json(),
                 ]);
-                
+
                 throw new \Exception($response->json()['message'] ?? 'Unknown error');
             }
-            
+
             $data = $response->json();
-            
-            // Transform data to our standardized format using DTO
+
             return (new WeatherData($data))->toArray();
         });
     }
-    
+
     /**
-     * Get weather forecast by city name (5 days / 3 hours)
-     *
-     * @param string $city
-     * @return array
-     * @throws \Exception
+     * Get 5-day forecast by city name
      */
     public function getForecastByCity(string $city): array
     {
         $cacheKey = 'weather_forecast_' . strtolower(str_replace(' ', '_', $city));
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($city) {
-            $response = Http::get("{$this->baseUrl}/forecast", [
-                'q' => $city,
-                'appid' => $this->apiKey,
-                'units' => 'metric',
-            ]);
-            
+            $response = Http::retry(3, 100)
+                ->get("{$this->baseUrl}/forecast", [
+                    'q' => $city,
+                    'appid' => $this->apiKey,
+                    'units' => $this->units,
+                ]);
+
             if ($response->failed()) {
                 Log::error('Failed to fetch forecast data', [
                     'city' => $city,
                     'status' => $response->status(),
                     'response' => $response->json(),
                 ]);
-                
+
                 throw new \Exception($response->json()['message'] ?? 'Unknown error');
             }
-            
+
             $data = $response->json();
-            
-            // Group forecast data by day for easier consumption by frontend
-            $result = [
+
+            return [
                 'city' => $data['city'],
-                'forecast' => $this->transformForecastData($data['list'])
+                'forecast' => $this->transformForecastData($data['list']),
             ];
-            
-            return $result;
         });
     }
-    
+
     /**
-     * Get weather data by geographic coordinates
-     *
-     * @param float $lat
-     * @param float $lon
-     * @return array
-     * @throws \Exception
+     * Get weather by geographic coordinates
      */
     public function getWeatherByCoordinates(float $lat, float $lon): array
     {
         $cacheKey = "weather_geo_{$lat}_{$lon}";
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($lat, $lon) {
-            $response = Http::get("{$this->baseUrl}/weather", [
-                'lat' => $lat,
-                'lon' => $lon,
-                'appid' => $this->apiKey,
-                'units' => 'metric',
-            ]);
-            
+            $response = Http::retry(3, 100)
+                ->get("{$this->baseUrl}/weather", [
+                    'lat' => $lat,
+                    'lon' => $lon,
+                    'appid' => $this->apiKey,
+                    'units' => $this->units,
+                ]);
+
             if ($response->failed()) {
                 Log::error('Failed to fetch weather data by coordinates', [
                     'lat' => $lat,
@@ -144,53 +130,49 @@ class WeatherService
                     'status' => $response->status(),
                     'response' => $response->json(),
                 ]);
-                
+
                 throw new \Exception($response->json()['message'] ?? 'Unknown error');
             }
-            
+
             $data = $response->json();
-            
-            // Transform data to our standardized format using DTO
+
             return (new WeatherData($data))->toArray();
         });
     }
-    
+
     /**
-     * Transform forecast data into daily groups
-     * 
-     * @param array $forecastList
-     * @return array
+     * Transform forecast into daily buckets
      */
     protected function transformForecastData(array $forecastList): array
     {
         $groupedForecast = [];
-        
+
         foreach ($forecastList as $item) {
-            $date = date('Y-m-d', $item['dt']);
-            
+            $timestamp = $item['dt'];
+            $date = date('Y-m-d', $timestamp);
+
             if (!isset($groupedForecast[$date])) {
                 $groupedForecast[$date] = [
                     'date' => $date,
-                    'day_name' => date('l', $item['dt']),
+                    'day_name' => date('l', $timestamp),
                     'items' => []
                 ];
             }
-            
+
             $groupedForecast[$date]['items'][] = [
-                'time' => date('H:i', $item['dt']),
-                'temp' => $item['main']['temp'],
-                'feels_like' => $item['main']['feels_like'],
-                'humidity' => $item['main']['humidity'],
-                'description' => $item['weather'][0]['description'],
-                'icon' => $item['weather'][0]['icon'],
-                'wind_speed' => $item['wind']['speed'],
-                'wind_direction' => $item['wind']['deg'],
-                'clouds' => $item['clouds']['all'],
-                'precipitation' => $item['pop'],
+                'time' => date('H:i', $timestamp),
+                'temp' => $item['main']['temp'] ?? null,
+                'feels_like' => $item['main']['feels_like'] ?? null,
+                'humidity' => $item['main']['humidity'] ?? null,
+                'description' => $item['weather'][0]['description'] ?? '',
+                'icon' => $item['weather'][0]['icon'] ?? '01d',
+                'wind_speed' => $item['wind']['speed'] ?? null,
+                'wind_direction' => $item['wind']['deg'] ?? null,
+                'clouds' => $item['clouds']['all'] ?? null,
+                'precipitation' => $item['pop'] ?? 0,
             ];
         }
-        
-        // Convert to indexed array for easier frontend handling
+
         return array_values($groupedForecast);
     }
 }

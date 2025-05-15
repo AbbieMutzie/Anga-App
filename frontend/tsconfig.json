@@ -18,7 +18,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
+    "baseUrl": "src",                 // 👈 this tells TS that "src" is the root
+    "paths": {
+      "@/*": ["*"]                    // 👈 this allows imports like "@/styles/globals.css"
+    },
     "plugins": [
       {
         "name": "next"
