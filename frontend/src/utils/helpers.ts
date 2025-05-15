@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { WeatherData, ForecastData, WeatherError } from '../interfaces/weather';
 import weatherService from '../services/weatherService';
 
-// Custom Hook
+// 🌦️ Custom Hook for Weather State
 export const useWeather = () => {
   const [currentWeather, setCurrentWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData[] | null>(null);
@@ -53,7 +53,7 @@ export const useWeather = () => {
   };
 };
 
-// 🌤️ Weather-to-gradient logic
+// 🎨 Weather-to-gradient mapping
 export function getWeatherGradientClass(weatherMain: string, date?: string): string {
   switch (weatherMain.toLowerCase()) {
     case 'clear':
@@ -77,26 +77,36 @@ export function getWeatherGradientClass(weatherMain: string, date?: string): str
   }
 }
 
-// 📅 Date & time formatting helpers
-export function formatDate(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
+// 📅 Date Formatter (with fallback to current date)
+export function formatDate(timestamp?: number): string {
+  const date = timestamp ? new Date(timestamp * 1000) : new Date();
+  if (isNaN(date.getTime())) {
+    return new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
     day: 'numeric',
-    year: 'numeric'
   });
 }
 
-export function formatTime(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleTimeString(undefined, {
+// 🕓 Time Formatter
+export function formatTime(timestamp?: number): string {
+  const date = timestamp ? new Date(timestamp * 1000) : new Date();
+  return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: true,
   });
 }
 
-// 🌤️ Weather icon URL
+// 🌤️ Weather Icon URL
 export function getWeatherIconUrl(iconCode: string): string {
   return `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 }

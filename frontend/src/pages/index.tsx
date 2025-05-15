@@ -1,10 +1,9 @@
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
-import CurrentWeather from '../components/weather/CurrentWeather';
-import ForecastWeather from '../components/weather/ForecastWeather';
 import SearchBar from '../components/weather/SearchBar';
-import WeatherDetails from '../components/weather/WeatherDetails';
+import ForecastWeather from '../components/weather/ForecastWeather';
+import UnifiedWeatherCard from '../components/weather/UnifiedWeatherCard';
 import { useWeather } from '../hooks/useWeather';
 
 const Home: NextPage = () => {
@@ -12,7 +11,6 @@ const Home: NextPage = () => {
   const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Try to load weather for a default city on initial load
     if (initialLoad) {
       searchCity('London');
       setInitialLoad(false);
@@ -32,13 +30,11 @@ const Home: NextPage = () => {
         },
         (error) => {
           console.error('Error getting location:', error);
-          // Fallback to a default city if geolocation fails
           searchCity('London');
         }
       );
     } else {
       console.error('Geolocation is not supported by this browser.');
-      // Fallback to a default city if geolocation is not supported
       searchCity('London');
     }
   };
@@ -90,10 +86,7 @@ const Home: NextPage = () => {
         )}
 
         {!loading && currentWeather && (
-          <div>
-            <CurrentWeather weatherData={currentWeather} />
-            <WeatherDetails weatherData={currentWeather} />
-          </div>
+          <UnifiedWeatherCard weatherData={currentWeather} />
         )}
 
         {!loading && forecast && forecast.length > 0 && (
